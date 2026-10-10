@@ -1,0 +1,1 @@
+عکس‌های جدید را در images/works قرار دهید؛ سپس در GitHub Desktop روی Commit to main و Push origin بزنید. پس از اجرای موفق GitHub Actions فهرست عکس‌ها به‌روزرسانی می‌شود. نام فایل‌ها انگلیسی و بدون فاصله باشد.\n

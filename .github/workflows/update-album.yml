@@ -1,0 +1,35 @@
+name: Update album photo list
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'images/works/**'
+      - '.github/workflows/update-album.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate photo list
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          folder = Path('images/works')
+          allowed = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
+          names = sorted((p.as_posix() for p in folder.iterdir()
+                          if p.is_file() and p.suffix.lower() in allowed), reverse=True)
+          Path('works.json').write_text(json.dumps(names, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')
+          PY
+      - name: Commit updated photo list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add works.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update album photo list"
+            git push
+          fi

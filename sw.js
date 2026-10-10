@@ -1,9 +1,12 @@
-const CACHE='samira-bahrami-pwa-v3-install-wizard';
-const LOCAL=["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./images/cover.jpg", "./images/gol-cube.gif", "./images/gol-logo.png", "./images/last-logo.jpg", "./images/page01.jpg", "./images/page02.jpg", "./images/page03.jpg", "./images/page04.jpg", "./images/page05.jpg", "./images/page06.jpg", "./images/page07.jpg", "./images/page08.jpg", "./images/page09.jpg", "./images/page10.jpg"];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(LOCAL))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
+const CACHE='samira-bahrami-auto-v1';
+self.addEventListener('install',e=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
- e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(resp=>{
-   const copy=resp.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); return resp;
- })));
+ if(e.request.method!=='GET')return;
+ e.respondWith(fetch(e.request).then(r=>{
+  if(r.ok && new URL(e.request.url).origin===self.location.origin){
+   const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));
+  }
+  return r;
+ }).catch(()=>caches.match(e.request)));
 });
