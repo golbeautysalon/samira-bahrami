@@ -22,7 +22,7 @@ jobs:
           allowed = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
           names = sorted((p.as_posix() for p in folder.iterdir()
                           if p.is_file() and p.suffix.lower() in allowed), reverse=True)
-          Path('works.json').write_text(json.dumps(names, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')
+          Path('works.json').write_text(json.dumps(names, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
           PY
       - name: Commit updated photo list
         run: |
