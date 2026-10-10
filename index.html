@@ -66,37 +66,41 @@ body{min-height:100vh;background:radial-gradient(circle at 50% 20%,#7a284a,#3b0d
 window.addEventListener("load",async()=>{
  const book=document.getElementById("book");
  const profile=book.querySelector('img[src="images/page01.jpg"]')?.closest(".page");
+ const status=document.createElement("div");
+ status.id="photoStatus";
+ status.style.cssText="font-size:13px;color:#ffe8ad;margin:3px auto 8px;direction:rtl";
+ document.querySelector(".hint").after(status);
+ let added=0;
  if(profile){
    try{
-     const response=await fetch("./works.json?t="+Date.now(),{cache:"no-store"});
-     if(response.ok){
-       const names=await response.json();
-       if(Array.isArray(names)){
-         const valid=names.filter(n=>typeof n==="string" && n.startsWith("images/works/") && /^[a-zA-Z0-9._-]+\.(jpg|jpeg|png|webp|gif)$/i.test(n.slice(13)));
-         for(const name of valid){
-           const page=document.createElement("div");page.className="page";
-           const photo=document.createElement("img");photo.src=name;photo.alt="نمونه‌کار جدید";
-           page.appendChild(photo);book.insertBefore(page,profile);
-         }
-       }
+     const response=await fetch("./works.json?refresh="+Date.now(),{cache:"no-store"});
+     if(!response.ok)throw new Error("HTTP "+response.status);
+     const names=await response.json();
+     if(!Array.isArray(names))throw new Error("works.json is not an array");
+     const valid=names.filter(n=>typeof n==="string" && /^images\/works\/[a-zA-Z0-9._-]+\.(jpg|jpeg|png|webp|gif)$/i.test(n));
+     for(const name of valid){
+       const page=document.createElement("div");page.className="page";
+       const photo=document.createElement("img");photo.src=name;photo.alt="نمونه‌کار جدید";
+       photo.addEventListener("error",()=>{status.textContent="خطا در بارگذاری عکس: "+name;});
+       page.appendChild(photo);book.insertBefore(page,profile);
+       added++;
      }
-   }catch(err){console.warn("فهرست تصاویر جدید دریافت نشد",err);}
-   // PageFlip's closed cover requires an even page count.
-   // Instead of a blank page, use the existing salon logo.
+     status.textContent=added ? "تعداد عکس‌های جدید شناسایی‌شده: "+added : "هنوز عکس جدیدی در فهرست شناسایی نشد";
+   }catch(err){status.textContent="خطا در دریافت فهرست عکس‌ها: "+err.message;console.warn(err);}
    if(book.querySelectorAll(".page").length%2){
      const page=document.createElement("div");page.className="page";
      const logo=document.createElement("img");logo.src="images/gol-logo.png";logo.alt="سالن زیبایی گل";
      page.appendChild(logo);book.insertBefore(page,profile);
    }
  }
- const pf=new St.PageFlip(document.getElementById("book"),{
+ const pf=new St.PageFlip(book,{
  width:450,height:600,size:"stretch",minWidth:280,maxWidth:520,minHeight:380,maxHeight:740,
  maxShadowOpacity:.55,showCover:true,mobileScrollSupport:false,usePortrait:true,flippingTime:900,
  swipeDistance:20,useMouseEvents:true,autoSize:true,drawShadow:true});
- pf.loadFromHTML(document.querySelectorAll(".page"));
+ pf.loadFromHTML(book.querySelectorAll(".page"));
  document.getElementById("nextBtn").addEventListener("click",()=>pf.flipPrev("top"));
  document.getElementById("prevBtn").addEventListener("click",()=>pf.flipNext("top"));
- setTimeout(()=>pf.turnToPage(document.querySelectorAll(".page").length-1),120);
+ setTimeout(()=>pf.turnToPage(book.querySelectorAll(".page").length-1),120);
 });
 </script><script>
 let deferredInstall=null;
