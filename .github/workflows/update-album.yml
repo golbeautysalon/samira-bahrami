@@ -5,6 +5,7 @@ on:
     paths:
       - 'images/works/**'
       - '.github/workflows/update-album.yml'
+      - 'works.json'
   workflow_dispatch:
 permissions:
   contents: write
